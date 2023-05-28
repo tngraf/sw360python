@@ -123,7 +123,7 @@ class ProjectMixin(BaseMixin):
         :raises SW360Error: if there is a negative HTTP response
         """
         projects = self.get_projects()
-        resp: list[str] = []
+        resp: List[str] = []
 
         if not projects:
             return None
@@ -348,7 +348,7 @@ class ProjectMixin(BaseMixin):
 
         raise SW360Error(response, url)
 
-    def update_project_releases(self, releases: list[str], project_id: str, add: bool = False) -> bool:
+    def update_project_releases(self, releases: List[str], project_id: str, add: bool = False) -> bool:
         """Update the releases of an existing project. If `add` is True,
         given `releases` are added to the project, otherwise, the existing
         releases will be replaced.
