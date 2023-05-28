@@ -61,7 +61,7 @@ class SW360OAuth2:
         self._client_id = data["client_id"]
         self._client_secret = data["client_secret"]
 
-    def create_client(self, description: str, writeable: False) -> None:
+    def create_client(self, description: str, writeable: bool = False) -> None:
         """Create an OAuth2 client
 
         Args:
@@ -89,11 +89,6 @@ class SW360OAuth2:
             requests.post(url, json=payload, verify=False, auth=auth, headers=headers)
         except Exception as ex:
             raise SW360Error(None, url, message="Cant create oauth client: " + repr(ex))
-
-    def generate_token(self) -> str:
-        """Generate a new bearer token
-        """
-        self.__oauth_token(True)
 
     def __token(self, create: bool = False) -> None:
         """Create or return Liferay Token

@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------
-# Copyright (c) 2019-2022 Siemens
+# Copyright (c) 2019-2023 Siemens
 # Copyright (c) 2022 BMW CarIT GmbH
 # All Rights Reserved.
 # Authors: thomas.graf@siemens.com, gernot.hillier@siemens.com
@@ -9,13 +9,15 @@
 # SPDX-License-Identifier: MIT
 # -------------------------------------------------------------------------------
 
+from typing import Any, Dict, Optional
 import requests
 
+from .base import BaseMixin
 from .sw360error import SW360Error
 
 
-class ComponentsMixin:
-    def get_all_components(self, fields=None, page=-1, page_size=-1):
+class ComponentsMixin(BaseMixin):
+    def get_all_components(self, fields: str = "", page: int = -1, page_size: int = -1) -> Optional[Dict[str, Any]]:
         """Get information of about all components
 
         API endpoint: GET /components
@@ -47,7 +49,7 @@ class ComponentsMixin:
         resp = resp["_embedded"]["sw360:components"]
         return resp
 
-    def get_components_by_type(self, component_type):
+    def get_components_by_type(self, component_type: str) -> Optional[Dict[str, Any]]:
         """Get information of about all components for certain type
 
         API endpoint: GET /components
@@ -73,7 +75,7 @@ class ComponentsMixin:
         resp = resp["_embedded"]["sw360:components"]
         return resp
 
-    def get_component(self, component_id):
+    def get_component(self, component_id: str) -> Optional[Dict[str, Any]]:
         """Get information of about a component
 
         API endpoint: GET /components/{id}
@@ -88,7 +90,7 @@ class ComponentsMixin:
         resp = self.api_get(self.url + "resource/api/components/" + component_id)
         return resp
 
-    def get_component_by_url(self, component_url):
+    def get_component_by_url(self, component_url: str) -> Optional[Dict[str, Any]]:
         """Get information of about a component
 
         API endpoint: GET /components
@@ -103,7 +105,7 @@ class ComponentsMixin:
         resp = self.api_get(component_url)
         return resp
 
-    def get_component_by_name(self, component_name):
+    def get_component_by_name(self, component_name: str) -> Optional[Dict[str, Any]]:
         """Get information of about a component
 
         API endpoint: GET /components
@@ -118,7 +120,7 @@ class ComponentsMixin:
         resp = self.api_get(self.url + "resource/api/components?name=" + component_name)
         return resp
 
-    def get_components_by_external_id(self, ext_id_name, ext_id_value=""):
+    def get_components_by_external_id(self, ext_id_name: str, ext_id_value: str = "") -> Optional[Dict[str, Any]]:
         """Get components by external id. `ext_id_value` can be left blank to
         search for all components with `ext_id_name`.
 
@@ -144,8 +146,8 @@ class ComponentsMixin:
             resp = resp["_embedded"]["sw360:components"]
         return resp
 
-    def create_new_component(self, name, description, component_type, homepage,
-                             component_details={}):
+    def create_new_component(self, name: str, description: str, component_type: str, homepage: str,
+                             component_details: Dict[str, Any] = {}) -> Optional[Dict[str, Any]]:
         """Create a new component
 
         API endpoint: POST /components
@@ -180,7 +182,7 @@ class ComponentsMixin:
 
         raise SW360Error(response, url)
 
-    def update_component(self, component, component_id):
+    def update_component(self, component: Optional[Dict[str, Any]], component_id: str) -> Optional[Dict[str, Any]]:
         """Update an existing component
 
         API endpoint: PATCH /components
@@ -207,8 +209,8 @@ class ComponentsMixin:
 
         raise SW360Error(response, url)
 
-    def update_component_external_id(self, ext_id_name, ext_id_value,
-                                     component_id, update_mode="none"):
+    def update_component_external_id(self, ext_id_name: str, ext_id_value: str,
+                                     component_id: str, update_mode: str = "none") -> Any:
         """Set or update external id of a component. If the id is already set, it
         will only be changed if `update_mode=="overwrite"`. The id can be
         deleted using `update_mode=="delete"`.
@@ -231,6 +233,9 @@ class ComponentsMixin:
         :raises SW360Error: if there is a negative HTTP response
         """
         complete_data = self.get_component(component_id)
+        if not complete_data:
+            return None
+
         ret = self._update_external_ids(complete_data, ext_id_name,
                                         ext_id_value, update_mode)
         (old_value, data, update) = ret
@@ -238,7 +243,7 @@ class ComponentsMixin:
             self.update_component(data, component_id)
         return old_value
 
-    def delete_component(self, component_id):
+    def delete_component(self, component_id: str) -> Optional[Dict[str, Any]]:
         """Delete an existing component
 
         API endpoint: DELETE /components
@@ -262,7 +267,7 @@ class ComponentsMixin:
 
         raise SW360Error(response, url)
 
-    def get_users_of_component(self, component_id):
+    def get_users_of_component(self, component_id: str) -> Optional[Dict[str, Any]]:
         """Get information of about the users of a component
 
         API endpoint: GET /components/usedBy/{id}

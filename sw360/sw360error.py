@@ -9,7 +9,10 @@
 # SPDX-License-Identifier: MIT
 # -------------------------------------------------------------------------------
 
+from typing import Optional
 import json
+
+from requests import Response
 
 
 class SW360Error(IOError):
@@ -23,7 +26,7 @@ class SW360Error(IOError):
     :type url: string
     """
 
-    def __init__(self, response=None, url=None, message=None):
+    def __init__(self, response: Optional[Response] = None, url: str = "", message: str = "") -> None:
         self.message = message
         self.response = response
         self.url = url

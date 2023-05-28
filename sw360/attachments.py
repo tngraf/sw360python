@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------
-# Copyright (c) 2019-2022 Siemens
+# Copyright (c) 2019-2023 Siemens
 # Copyright (c) 2022 BMW CarIT GmbH
 # All Rights Reserved.
 # Authors: thomas.graf@siemens.com, gernot.hillier@siemens.com
@@ -9,20 +9,23 @@
 # SPDX-License-Identifier: MIT
 # -------------------------------------------------------------------------------
 
+from typing import Any, Dict, Optional
 import json
-import os
-import requests
 import logging
-
-from .sw360error import SW360Error
+import os
 from http import HTTPStatus
+
+import requests
+
+from .base import BaseMixin
+from .sw360error import SW360Error
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 
 
-class AttachmentsMixin:
-    def get_attachment_infos_by_hash(self, hashvalue):
+class AttachmentsMixin(BaseMixin):
+    def get_attachment_infos_by_hash(self, hashvalue: str) -> Optional[Dict[str, Any]]:
         """Get information about attachments with a given sha1 hash value.
 
         This usually returns zero or one result, but if the same binary file
@@ -37,7 +40,7 @@ class AttachmentsMixin:
         )
         return resp
 
-    def get_attachment_infos_for_resource(self, resource_type, resource_id):
+    def get_attachment_infos_for_resource(self, resource_type: str, resource_id: str) -> Optional[Dict[str, Any]]:
         """Get information about the attachments of a specific resource.
 
         Usually, you don't need to call this directly, but use one of the
@@ -51,6 +54,9 @@ class AttachmentsMixin:
             + resource_id
             + "/attachments"
         )
+        
+        if not resp:
+            return None
 
         if "_embedded" not in resp:
             return None
@@ -61,7 +67,7 @@ class AttachmentsMixin:
         resp = resp["_embedded"]["sw360:attachments"]
         return resp
 
-    def get_attachment_infos_for_release(self, release_id):
+    def get_attachment_infos_for_release(self, release_id: str) -> Optional[Dict[str, Any]]:
         """Get information about the attachments of a release
 
         :param release_id: id of the release from which to list attachments
@@ -70,7 +76,7 @@ class AttachmentsMixin:
         resp = self.get_attachment_infos_for_resource("releases", release_id)
         return resp
 
-    def get_attachment_infos_for_component(self, component_id):
+    def get_attachment_infos_for_component(self, component_id: str) -> Optional[Dict[str, Any]]:
         """Get information about the attachments of a component
 
         :param component_id: id of the component from which to list attachments
@@ -79,7 +85,7 @@ class AttachmentsMixin:
         resp = self.get_attachment_infos_for_resource("components", component_id)
         return resp
 
-    def get_attachment_infos_for_project(self, project_id):
+    def get_attachment_infos_for_project(self, project_id: str) -> Optional[Dict[str, Any]]:
         """Get information about the attachments of a project
 
         :param project_id: id of the project from which to list attachments
@@ -88,7 +94,7 @@ class AttachmentsMixin:
         resp = self.get_attachment_infos_for_resource("projects", project_id)
         return resp
 
-    def get_attachment_by_url(self, url):
+    def get_attachment_by_url(self, url: str) -> Optional[Dict[str, Any]]:
         """Get information about attachment.
 
         :param url: the full url of the attachment to be requested
@@ -96,7 +102,7 @@ class AttachmentsMixin:
         resp = self.api_get(url)
         return resp
 
-    def get_attachment(self, attachment_id):
+    def get_attachment(self, attachment_id: str) -> Optional[Dict[str, Any]]:
         """Get information about an attachment
 
         API endpoint: GET /attachments
@@ -107,7 +113,7 @@ class AttachmentsMixin:
         resp = self.api_get(self.url + "resource/api/attachments/" + attachment_id)
         return resp
 
-    def download_release_attachment(self, filename, release_id, attachment_id):
+    def download_release_attachment(self, filename: str, release_id: str, attachment_id: str) -> None:
         """Downloads an attachment of a release
 
         API endpoint: GET /attachments
@@ -117,7 +123,7 @@ class AttachmentsMixin:
             filename, "releases", release_id, attachment_id
         )
 
-    def download_project_attachment(self, filename, project_id, attachment_id):
+    def download_project_attachment(self, filename: str, project_id: str, attachment_id: str) -> None:
         """Downloads an attachment of a project
 
         API endpoint: GET /attachments
@@ -127,7 +133,7 @@ class AttachmentsMixin:
             filename, "projects", project_id, attachment_id
         )
 
-    def download_component_attachment(self, filename, component_id, attachment_id):
+    def download_component_attachment(self, filename: str, component_id: str, attachment_id: str) -> None:
         """Downloads an attachment of a component
 
         API endpoint: GET /attachments
@@ -137,7 +143,7 @@ class AttachmentsMixin:
             filename, "components", component_id, attachment_id
         )
 
-    def download_resource_attachment(self, filename, resource_type, resource_id, attachment_id):
+    def download_resource_attachment(self, filename: str, resource_type: str, resource_id: str, attachment_id: str) -> None:
         """Downloads an attachment from SW360 (only for internal use)
 
         API endpoint: GET /attachments
@@ -160,7 +166,7 @@ class AttachmentsMixin:
         )
         self.download_attachment(filename, url)
 
-    def download_attachment(self, filename, download_url):
+    def download_attachment(self, filename: str, download_url: str) -> None:
         """Downloads an attachment from SW360
 
         API endpoint: GET /attachments
@@ -171,8 +177,8 @@ class AttachmentsMixin:
         req = requests.get(download_url, allow_redirects=True, headers=hdr)
         open(filename, "wb").write(req.content)
 
-    def _upload_resource_attachment(self, resource_type, resource_id, upload_file,
-                                    upload_type="SOURCE", upload_comment=""):
+    def _upload_resource_attachment(self, resource_type: str, resource_id: str, upload_file: str,
+                                    upload_type: str = "SOURCE", upload_comment: str = "") -> None:
         """Upload `upload_file` as attachment to SW360 for the resource with the given id
         using `upload_comment` for it. `upload_type` can be
         "DOCUMENT"
@@ -218,8 +224,8 @@ class AttachmentsMixin:
         if not response.ok:
             raise SW360Error(response, url)
 
-    def upload_release_attachment(self, release_id, upload_file, upload_type="SOURCE",
-                                  upload_comment=""):
+    def upload_release_attachment(self, release_id: str, upload_file: str, upload_type: str = "SOURCE",
+                                  upload_comment: str = "") -> None:
         """Upload `upload_file` as attachment to SW360 for `release_id`,
         using `upload_comment` for it. `upload_type` can be
         "DOCUMENT"
@@ -239,8 +245,8 @@ class AttachmentsMixin:
             "releases", release_id, upload_file,
             upload_type=upload_type, upload_comment=upload_comment)
 
-    def upload_component_attachment(self, component_id, upload_file, upload_type="SOURCE",
-                                    upload_comment=""):
+    def upload_component_attachment(self, component_id: str, upload_file: str, upload_type: str = "SOURCE",
+                                    upload_comment: str = "") -> None:
         """Upload `upload_file` as attachment to SW360 for `component_id`,
         using `upload_comment` for it. `upload_type` can be
         "DOCUMENT"
@@ -260,8 +266,8 @@ class AttachmentsMixin:
             "components", component_id, upload_file,
             upload_type=upload_type, upload_comment=upload_comment)
 
-    def upload_project_attachment(self, project_id, upload_file, upload_type="SOURCE",
-                                  upload_comment=""):
+    def upload_project_attachment(self, project_id: str, upload_file: str, upload_type: str = "SOURCE",
+                                  upload_comment: str = "") -> None:
         """Upload `upload_file` as attachment to SW360 for `project_id` of,
         using `upload_comment` for it. `upload_type` can be
         "DOCUMENT"

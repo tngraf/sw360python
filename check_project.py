@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------
-# Copyright (c) 2019-2020 Siemens
+# Copyright (c) 2019-2023 Siemens
 # All Rights Reserved.
 # Author: thomas.graf@siemens.com
 #
@@ -34,12 +34,15 @@ Staging system:
 python check_project.py -n tr-card -v 1.0 -t <token> -url https://stage.sw360.siemens.com
 """
 
+from typing import Any, Dict, Optional
 import argparse
 import os
 import sys
-from colorama import init, Fore, Style
+
 import requests
-import sw360
+from colorama import Fore, Style, init
+
+from sw360 import SW360, SW360Error
 
 # Do you use an oauth flow? This is usually False if you get your SW360 token
 # in the SW360 preferences and true if you get it via a separate OAuth2 flow
@@ -51,14 +54,14 @@ init()
 
 class CheckProject():
     """Check a project on SW360, display component clearing status"""
-    def __init__(self):
-        self.client = None
+    def __init__(self) -> None:
+        self.client: SW360
         self.project_id = ""
-        self.project = None
+        self.project: Dict[str, Any]
         self.sw360_url = "https://sw360.siemens.com"
 
     @classmethod
-    def get_clearing_state(cls, proj, href):
+    def get_clearing_state(cls, proj: Dict[str, Any], href: str) -> Optional[str]:
         """Returns the clearing state of the given component/release"""
         rel = proj["linkedReleases"]
         for key in rel:
@@ -67,9 +70,12 @@ class CheckProject():
 
         return None
 
-    def has_source_code(self, href):
+    def has_source_code(self, href: str) -> bool:
         """Returns true if a source code attachment is available"""
         rel = self.client.get_release_by_url(href)
+        if not rel:
+            return False
+
         if "_embedded" not in rel:
             return False
 
@@ -83,7 +89,7 @@ class CheckProject():
 
         return False
 
-    def show_linked_projects(self, project):
+    def show_linked_projects(self, project: Dict[str, Any]) -> None:
         """Show linked projects of the given project"""
         if "sw360:projects" in project["_embedded"]:
             linked_projects = project["_embedded"]["sw360:projects"]
@@ -94,7 +100,7 @@ class CheckProject():
         else:
             print("\n    No linked projects")
 
-    def show_linked_releases(self, project):
+    def show_linked_releases(self, project: Dict[str, Any]) -> None:
         """Show linked releases of the given project"""
         if "sw360:releases" in project["_embedded"]:
             print("\n  Components: ")
@@ -117,13 +123,16 @@ class CheckProject():
         else:
             print("    No linked releases")
 
-    def show_project_status(self, project_id):
+    def show_project_status(self, project_id: str) -> None:
         """Retrieve and display project status"""
         try:
             project = self.client.get_project(project_id)
-        except sw360.SW360Error as swex:
+        except SW360Error as swex:
             print(Fore.LIGHTRED_EX + "  ERROR: unable to access project!")
             sys.exit("  " + str(swex) + Style.RESET_ALL)
+
+        if not project:
+            return
 
         print("  Project name: " + project["name"] + ", " + project["version"])
         if "projectResponsible" in project:
@@ -134,7 +143,7 @@ class CheckProject():
         self.show_linked_projects(project)
         self.show_linked_releases(project)
 
-    def login(self, token=None, url=None):
+    def login(self, token: str = "", url: str = "") -> bool:
         """Login to SW360"""
         if token:
             sw360_api_token = token
@@ -150,12 +159,12 @@ class CheckProject():
         if not sw360_api_token:
             sys.exit(Fore.LIGHTRED_EX + "  No SW360 API token specified!" + Style.RESET_ALL)
 
-        self.client = sw360.SW360(self.sw360_url, sw360_api_token, oauth2=OAUTH2)
+        self.client = SW360(self.sw360_url, sw360_api_token, oauth2=OAUTH2)
 
         try:
             result = self.client.login_api()
             return result
-        except sw360.SW360Error as swex:
+        except SW360Error as swex:
             if swex.response and (swex.response.status_code == requests.codes['unauthorized']):
                 sys.exit(
                     Fore.LIGHTRED_EX +
@@ -167,14 +176,15 @@ class CheckProject():
                     "  Error authorizing user!" +
                     Style.RESET_ALL)
 
-    def find_project(self, name, version):
+    def find_project(self, name: str, version: str) -> str:
         """Find the project with the matching name and version on SW360"""
         projects = self.client.get_projects_by_name(name)
         if not projects:
             sys.exit(Fore.YELLOW + "  No matching project found!" + Style.RESET_ALL)
 
         print("  Searching for projects")
-        for project in projects:
+        project: Dict[str, Any]
+        for project in projects:  # type: ignore
             href = project["_links"]["self"]["href"]
             if "version" not in project:
                 print(
@@ -196,10 +206,10 @@ class CheckProject():
                 if project["version"].lower() == version:
                     return pid
 
-        return None
+        return ""
 
     @classmethod
-    def parse_commandline(cls):
+    def parse_commandline(cls) -> Any:
         """Parse command line arguments"""
         parser = argparse.ArgumentParser(
             description="Check a project on SW360, display component clearing status"
@@ -231,7 +241,7 @@ class CheckProject():
 
         return args
 
-    def main(self):
+    def main(self) -> None:
         """Main method"""
         print("\nCheck a project on SW360")
 

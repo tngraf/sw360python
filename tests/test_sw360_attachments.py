@@ -10,15 +10,16 @@
 import os
 import sys
 import tempfile
-from unittest.mock import MagicMock, patch
-import warnings
 import unittest
+import warnings
+from typing import Any
+from unittest.mock import MagicMock, patch
 
 import responses
 
 sys.path.insert(1, "..")
 
-from sw360 import SW360, SW360Error   # noqa: E402
+from sw360 import SW360, SW360Error  # noqa: E402
 
 
 class Sw360TestAttachments(unittest.TestCase):
@@ -26,10 +27,10 @@ class Sw360TestAttachments(unittest.TestCase):
     MYURL = "https://my.server.com/"
     ERROR_MSG_NO_LOGIN = "Unable to login"
 
-    def setUp(self):
+    def setUp(self) -> None:
         warnings.simplefilter("ignore", ResourceWarning)
 
-    def _add_login_response(self):
+    def _add_login_response(self) -> None:
         """
         Add the response for a successfull login.
         """
@@ -42,18 +43,18 @@ class Sw360TestAttachments(unittest.TestCase):
             adding_headers={"Authorization": "Token " + self.MYTOKEN},
         )
 
-    def _my_matcher(self):
+    def _my_matcher(self) -> Any:
         """
         Helper method to display the JSON parameters of a REST call.
         """
-        def display_json_params(request_body):
+        def display_json_params(request_body) -> bool:
             print("MyMatcher:'" + request_body + "'")
             return True
 
         return display_json_params
 
     @responses.activate
-    def test_get_attachment_infos_by_hash(self):
+    def test_get_attachment_infos_by_hash(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -78,7 +79,7 @@ class Sw360TestAttachments(unittest.TestCase):
         self.assertEqual("5f392efeb0934339fb6b0f3e021076db19fad164", att_info[0]["sha1"])
 
     @responses.activate
-    def test_get_attachment_infos_for_release(self):
+    def test_get_attachment_infos_for_release(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -100,7 +101,7 @@ class Sw360TestAttachments(unittest.TestCase):
         self.assertEqual("ABCD", attachments[0]["sha1"])
 
     @responses.activate
-    def test_get_attachment_infos_for_component(self):
+    def test_get_attachment_infos_for_component(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -121,7 +122,7 @@ class Sw360TestAttachments(unittest.TestCase):
         self.assertTrue(len(attachments) > 0)
 
     @responses.activate
-    def test_get_attachment_infos_for_project(self):
+    def test_get_attachment_infos_for_project(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -142,7 +143,7 @@ class Sw360TestAttachments(unittest.TestCase):
         self.assertTrue(len(attachments) > 0)
 
     @responses.activate
-    def test_get_attachment_by_url(self):
+    def test_get_attachment_by_url(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -163,7 +164,7 @@ class Sw360TestAttachments(unittest.TestCase):
         self.assertTrue(len(attachments) > 0)
 
     @responses.activate
-    def test_download_release_attachment_no_resource_id(self):
+    def test_download_release_attachment_no_resource_id(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -176,7 +177,7 @@ class Sw360TestAttachments(unittest.TestCase):
         self.assertEqual("No resource id provided!", context.exception.message)
 
     @responses.activate
-    def test_download_release_attachment_no_attachment_id(self):
+    def test_download_release_attachment_no_attachment_id(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -189,7 +190,7 @@ class Sw360TestAttachments(unittest.TestCase):
         self.assertEqual("No attachment id provided!", context.exception.message)
 
     @responses.activate
-    def test_download_release_attachment(self):
+    def test_download_release_attachment(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -217,7 +218,7 @@ class Sw360TestAttachments(unittest.TestCase):
         os.removedirs(tmpdir)
 
     @responses.activate
-    def test_download_project_attachment(self):
+    def test_download_project_attachment(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -245,7 +246,7 @@ class Sw360TestAttachments(unittest.TestCase):
         os.removedirs(tmpdir)
 
     @responses.activate
-    def test_download_component_attachment(self):
+    def test_download_component_attachment(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -273,7 +274,7 @@ class Sw360TestAttachments(unittest.TestCase):
         os.removedirs(tmpdir)
 
     @responses.activate
-    def test_get_attachment(self):
+    def test_get_attachment(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -294,7 +295,7 @@ class Sw360TestAttachments(unittest.TestCase):
         self.assertTrue(len(attachments) > 0)
 
     @responses.activate
-    def test_upload_resource_attachment_no_resource_type(self):
+    def test_upload_resource_attachment_no_resource_type(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -314,7 +315,7 @@ class Sw360TestAttachments(unittest.TestCase):
             pass
 
     @responses.activate
-    def test_upload_attachment_file_does_not_exist(self):
+    def test_upload_attachment_file_does_not_exist(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -329,7 +330,7 @@ class Sw360TestAttachments(unittest.TestCase):
         self.assertTrue(context.exception.message.startswith("ERROR: file not found:"))
 
     @responses.activate
-    def test_upload_release_attachment_no_release_id(self):
+    def test_upload_release_attachment_no_release_id(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -349,7 +350,7 @@ class Sw360TestAttachments(unittest.TestCase):
             pass
 
     @responses.activate
-    def test_upload_release_attachment(self):
+    def test_upload_release_attachment(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -375,7 +376,7 @@ class Sw360TestAttachments(unittest.TestCase):
             pass
 
     @responses.activate
-    def test_upload_release_attachment_failed(self):
+    def test_upload_release_attachment_failed(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -409,7 +410,7 @@ class Sw360TestAttachments(unittest.TestCase):
         self.assertEqual("forbidded", context.exception.details["message"])
 
     @responses.activate
-    def test_upload_release_attachment_returns_202(self):
+    def test_upload_release_attachment_returns_202(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -445,7 +446,7 @@ class Sw360TestAttachments(unittest.TestCase):
             pass
 
     @responses.activate
-    def test_upload_component_attachment(self):
+    def test_upload_component_attachment(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()
@@ -471,7 +472,7 @@ class Sw360TestAttachments(unittest.TestCase):
             pass
 
     @responses.activate
-    def test_upload_project_attachment(self):
+    def test_upload_project_attachment(self) -> None:
         lib = SW360(self.MYURL, self.MYTOKEN, False)
         lib.force_no_session = True
         self._add_login_response()

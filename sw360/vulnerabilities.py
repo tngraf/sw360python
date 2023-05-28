@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------
-# Copyright (c) 2019-2022 Siemens
+# Copyright (c) 2019-2023 Siemens
 # Copyright (c) 2022 BMW CarIT GmbH
 # All Rights Reserved.
 # Authors: thomas.graf@siemens.com, gernot.hillier@siemens.com
@@ -9,8 +9,12 @@
 # SPDX-License-Identifier: MIT
 # -------------------------------------------------------------------------------
 
-class VulnerabilitiesMixin:
-    def get_all_vulnerabilities(self):
+from typing import Any, Dict, Optional
+
+from .base import BaseMixin
+
+class VulnerabilitiesMixin(BaseMixin):
+    def get_all_vulnerabilities(self) -> Optional[Dict[str, Any]]:
         """Get information of about all vulnerabilities
 
         API endpoint: GET /vulnerabilities
@@ -23,7 +27,7 @@ class VulnerabilitiesMixin:
         resp = self.api_get(self.url + "resource/api/vulnerabilities")
         return resp
 
-    def get_vulnerability(self, vulnerability_id):
+    def get_vulnerability(self, vulnerability_id: str) -> Optional[Dict[str, Any]]:
         """Get information of about a vulnerability
 
         API endpoint: GET /vulnerabilities/{id}

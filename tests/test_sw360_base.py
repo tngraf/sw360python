@@ -16,7 +16,7 @@ import responses
 
 sys.path.insert(1, "..")
 
-from sw360 import SW360, SW360Error   # noqa: E402
+from sw360 import SW360, SW360Error  # noqa: E402
 
 
 class Sw360Test(unittest.TestCase):
