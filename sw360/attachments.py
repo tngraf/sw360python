@@ -54,7 +54,7 @@ class AttachmentsMixin(BaseMixin):
             + resource_id
             + "/attachments"
         )
-        
+
         if not resp:
             return None
 
@@ -143,7 +143,11 @@ class AttachmentsMixin(BaseMixin):
             filename, "components", component_id, attachment_id
         )
 
-    def download_resource_attachment(self, filename: str, resource_type: str, resource_id: str, attachment_id: str) -> None:
+    def download_resource_attachment(self,
+                                     filename: str,
+                                     resource_type: str,
+                                     resource_id: str,
+                                     attachment_id: str) -> None:
         """Downloads an attachment from SW360 (only for internal use)
 
         API endpoint: GET /attachments

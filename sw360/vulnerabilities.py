@@ -13,6 +13,7 @@ from typing import Any, Dict, Optional
 
 from .base import BaseMixin
 
+
 class VulnerabilitiesMixin(BaseMixin):
     def get_all_vulnerabilities(self) -> Optional[Dict[str, Any]]:
         """Get information of about all vulnerabilities
