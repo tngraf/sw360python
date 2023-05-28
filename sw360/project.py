@@ -9,7 +9,7 @@
 # SPDX-License-Identifier: MIT
 # -------------------------------------------------------------------------------
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 import requests
 
 from .base import BaseMixin
@@ -113,7 +113,7 @@ class ProjectMixin(BaseMixin):
         resp = resp["_embedded"]["sw360:projects"]
         return resp
 
-    def get_project_names(self) -> Optional[list[str]]:
+    def get_project_names(self) -> Optional[List[str]]:
         """Get all project names
 
         API endpoint: GET /projects
