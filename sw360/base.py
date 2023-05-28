@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: MIT
 # -------------------------------------------------------------------------------
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 import requests
 
 from .sw360error import SW360Error
@@ -72,8 +72,9 @@ class BaseMixin():
 
         raise SW360Error(response, url)
 
+    # type checking: not for Python 3.8: tuple[Optional[Any], Dict[str, Dict[str, str]], bool]
     def _update_external_ids(self, current_data: Dict[str, Any], ext_id_name: str, ext_id_value: str,
-                             update_mode: str) -> tuple[Optional[Any], Dict[str, Dict[str, str]], bool]:
+                             update_mode: str) -> Tuple[Optional[Any], Dict[str, Dict[str, str]], bool]:
         """Internal helper function to prepare an update/addition of external
         id while preserving the others."""
         old_value = None
